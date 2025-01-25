@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "paramgaurd-core",
+    "paramgaurd-cli",
+    "paramguard-gui"
+]
