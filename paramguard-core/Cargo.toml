@@ -1,0 +1,8 @@
+[package]
+name = "paramguard-core"
+version = "0.1.0"
+edition = "2021"
+authors = ["Bryan Hyland <bryan.hyland32@gmail.com>"]
+description = "The core functionality for the ParamGuard CLI and GUI applications."
+
+[dependencies]

@@ -1,6 +1,8 @@
 [workspace]
 members = [
-    "paramgaurd-core",
-    "paramgaurd-cli",
+    "paramguard-core",
+    "paramguard-cli",
     "paramguard-gui"
 ]
+
+resolver = "2"
