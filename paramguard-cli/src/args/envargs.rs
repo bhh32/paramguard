@@ -1,13 +1,13 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Clone, Debug, PartialEq)]
-pub struct EnvArgs {
+pub(crate) struct EnvArgs {
     #[structopt(subcommand)]
     pub subcommands: EnvSubCommands,
 }
 
 #[derive(Subcommand, Clone, Debug, PartialEq)]
-pub enum EnvSubCommands {
+pub(crate) enum EnvSubCommands {
     /// Add a new environment variable
     Add {
         #[arg(short, long, required = true, help = "Add a new environment variable")]

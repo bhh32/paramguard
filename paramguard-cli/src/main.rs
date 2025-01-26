@@ -7,7 +7,7 @@ use crate::cli::{Cli, Commands};
 use crate::tui::Tui;
 use args::configargs::ConfigSubCommands;
 use clap::Parser;
-use paramguard_core::logic::env_logic;
+use paramguard_core::logic::{config_logic, env_logic};
 
 fn main() -> Result<(), std::io::Error> {
     let cli = Cli::parse();
@@ -28,27 +28,37 @@ fn main() -> Result<(), std::io::Error> {
                     content,
                     env_var,
                 } => {
+                    // Even if the flag was set, the content might not be there - so we need to check
                     if content.is_some() {
-                        match env_logic::create_config_file(
+                        // If the content is there, we create a config file with the content
+                        match config_logic::create_config_file(
                             name,
                             path,
+                            // Get the value of content from the Option
                             if let Some(cont) = content {
                                 cont
                             } else {
+                                // Return an error if getting the content failed
                                 return Err(std::io::Error::new(
                                     std::io::ErrorKind::InvalidInput,
                                     "Couldn't read the input for the content argument",
                                 ));
                             },
                         ) {
+                            // If the file was created successfully, we do nothing
                             Ok(_) => {}
+                            // If the file creation failed, we print an error
                             Err(e) => {
                                 eprintln!("Error creating config file: {}", e);
                             }
                         }
+                    // If the content is not there, we create an env file with the env_var
                     } else {
+                        // Create the env file
                         match env_logic::create_env_file(name, path, env_var) {
+                            // If the file was created successfully, we do nothing
                             Ok(_) => {}
+                            // If the file creation failed, we print an error
                             Err(e) => {
                                 eprintln!("Error creating env file: {}", e);
                             }

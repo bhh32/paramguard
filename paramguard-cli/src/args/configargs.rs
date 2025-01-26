@@ -1,13 +1,13 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Clone, Debug, PartialEq)]
-pub struct ConfigArgs {
+pub(crate) struct ConfigArgs {
     #[structopt(subcommand)]
-    pub subcommands: ConfigSubCommands,
+    pub(crate) subcommands: ConfigSubCommands,
 }
 
 #[derive(Subcommand, Clone, Debug, PartialEq)]
-pub enum ConfigSubCommands {
+pub(crate) enum ConfigSubCommands {
     /// Create a new configuration file
     Create {
         #[arg(
