@@ -49,13 +49,6 @@ pub(crate) enum ConfigSubCommands {
             short,
             long,
             required = true,
-            help = "New content of the configuration file to update"
-        )]
-        content: String,
-        #[arg(
-            short,
-            long,
-            required = true,
             help = "Path to the configuration file to update"
         )]
         path: String,
