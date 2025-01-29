@@ -1,5 +1,6 @@
 pub mod args;
 mod cli;
+pub mod commands;
 pub mod logic;
 pub mod tui;
 

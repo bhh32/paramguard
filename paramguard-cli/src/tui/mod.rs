@@ -1,4 +1,5 @@
 pub mod components;
+pub mod screens;
 pub mod terminal;
 pub mod tui_logic;
 
