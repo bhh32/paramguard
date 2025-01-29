@@ -1,7 +1,3 @@
- a well-structured and user-friendly `README.md` for the **ParamGuard** application:
-
- ---
-
  # **ParamGuard**
 
  ParamGuard is a standalone configuration management tool designed to simplify and secure the handling of environment variables, application configurations, and key-value pairs. It features a **command-line interface (CLI)**, an **interactive Text User Interface (TUI)**, and a **graphical user interface (GUI)** to meet the needs of developers, DevOps engineers, and IT administrators.
@@ -77,9 +73,10 @@
 						   ```
 
 ### GUI
-1. Launch the GUI application:
+1. Launch the GUI application (while in development):
 
-```bash						         ./target/release/paramguard-gui
+```bash
+./target/release/paramguard-gui
 ```
 2. Use the intuitive graphical interface to manage configurations, edit files, or adjust settings.
 
@@ -128,5 +125,5 @@ ParamGuard allows you to customize its behavior through settings:
 1. Core functionality as a shared library (`paramguard-core`).
 2. CLI/TUI as a single binary (`paramguard-cli`).
 3. GUI as a separate binary (`paramguard-gui`).
-4. Advanced features such as schema validation for JSON/YAML configurations and automatic cleanup of archived files.
+4. Advanced features such as schema validation for JSON/YAML/TOML/ENV/CFG/INI/NIX configurations and automatic cleanup of archived files.
 
