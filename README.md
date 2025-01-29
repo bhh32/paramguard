@@ -9,68 +9,69 @@
  ## **Features**
  - **Environment Variable Management**:
    - Add, edit, group, export, and import environment variables.
-   - **Configuration File Support**:
-     - Manage JSON, YAML, INI, and XML files with schema validation.
-     - **Key-Value Pair Management**:
-       - Store and organize custom key-value pairs for your applications.
-       - **Archiving System**:
-         - Safely archive configurations with configurable retention periods to prevent accidental deletion.
-	 - **Interactive TUI**:
-	   - Navigate and edit configurations visually using arrow keys in a terminal-based interface.
-	   - **Security Built-In**:
-	     - Encrypt sensitive data locally using AES-GCM encryption.
-	       - Protect access with password-based authentication using Argon2 hashing.
+- **Configuration File Support**:
+   - Manage JSON, YAML, INI, and XML files with schema validation.
+- **Key-Value Pair Management**:
+   - Store and organize custom key-value pairs for your applications.
+- **Archiving System**:
+   - Safely archive configurations with configurable retention periods to prevent accidental deletion.
+- **Interactive TUI**:
+   - Navigate and edit configurations visually using arrow keys in a terminal-based interface.
+- **Security Built-In**:
+   - Encrypt sensitive data locally using AES-GCM encryption.
+   - Protect access with password-based authentication using Argon2 hashing.
 
-	       ---
+---
 
-	       ## **Installation**
+## **Installation**
 
-	       ### Prerequisites
-	       - Rust (latest stable version)
-	       - SQLite (optional; included by default)
+### Prerequisites
+- Rust (latest stable version)
+- SQLite (included by default)
 
-	       ### Build from Source
-	       1. Clone the repository:
-	          ```bash
-		     git clone https://github.com/OpenGuardianTech/paramguard.git
-		        cd paramguard
-			   ```
+### Build from Source
+1. Clone the repository:
 
-			   2. Build the CLI/TUI binary:
-			      ```bash
-			         cargo build --release --package paramguard-cli
-				    ```
+```bash
+git clone https://github.com/OpenGuardianTech/paramguard.git
+cd paramguard
+```
 
-				    3. Build the GUI binary:
-				       ```bash
-				          cargo build --release --package paramguard-gui
-					     ```
+2. Build the CLI/TUI binary:
+```bash
+ cargo build --release --package paramguard-cli
+```
 
-					     4. Run the binaries:
-					        - CLI/TUI: `./target/release/paramguard-cli`
-						   - GUI: `./target/release/paramguard-gui`
+3. Build the GUI binary:
+```bash
+  cargo build --release --package paramguard-gui
+```
 
-						   ---
+4. Run the binaries:
+- CLI/TUI: `./target/release/paramguard-cli`
+- GUI: `./target/release/paramguard-gui`
 
-						   ## **Usage**
+---
 
-						   ### CLI Examples
-						   ```bash
-						   # Add an environment variable
-						   paramguard-cli env add --name "API_KEY" --value "12345"
+## **Usage**
 
-						   # List all environment variables in a set
-						   paramguard-cli env list --set "development"
+### CLI Examples
+```bash
+# Add an environment variable
+paramguard-cli env add --name "API_KEY" --value "12345"
 
-						   # Archive a configuration file
-						   paramguard-cli archive --name "old-config"
+# List all environment variables in a set
+paramguard-cli env list --set "development"
 
-						   # Restore an archived configuration file
-						   paramguard-cli archive restore --name "old-config"
+# Archive a configuration file
+paramguard-cli archive --name "old-config"
 
-						   # Launch the interactive TUI
-						   paramguard-cli tui
-						   ```
+# Restore an archived configuration file
+paramguard-cli archive restore --name "old-config"
+
+# Launch the interactive TUI
+paramguard-cli tui
+```
 
 ### GUI
 1. Launch the GUI application (while in development):
@@ -105,17 +106,17 @@ ParamGuard allows you to customize its behavior through settings:
 ### Example Settings Commands (CLI)
 
 ```bash
-    # Set retention period for archived files (in days)
-    paramguard-cli archive --set-retention-period 30
+# Set retention period for archived files (in days)
+paramguard-cli archive --set-retention-period 30
     
-    # Enable automatic deletion of archived files after retention period expires
-    paramguard-cli archive --set-auto-remove
+# Enable automatic deletion of archived files after retention period expires
+paramguard-cli archive --set-auto-remove
 
-    # Disable automatic deletion of archived files after retention period
-    paramguard-cli archive --set-auto-remove=false
+# Disable automatic deletion of archived files after retention period
+paramguard-cli archive --set-auto-remove=false
 
-    # View current settings
-    paramguard-cli settings show
+# View current settings
+paramguard-cli settings show
 ```
 
 ---
