@@ -1,13 +1,31 @@
 use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 
 #[derive(Parser, Clone, Debug, PartialEq)]
 pub(crate) struct ConfigArgs {
-    #[structopt(subcommand)]
-    pub(crate) subcommands: ConfigSubCommands,
+    #[command(subcommand)]
+    pub(crate) subcommands: ConfigCommands,
 }
 
 #[derive(Subcommand, Clone, Debug, PartialEq)]
-pub(crate) enum ConfigSubCommands {
+pub(crate) enum ConfigCommands {
+    /// Add a configuration file to be tracked
+    Add {
+        #[arg(
+            short,
+            long,
+            required = true,
+            help = "Name of the configuration file to track"
+        )]
+        name: String,
+        #[arg(
+            short,
+            long,
+            required = true,
+            help = "Path where the configuration file is on disk"
+        )]
+        path: PathBuf,
+    },
     /// Create a new configuration file
     Create {
         #[arg(
@@ -23,7 +41,7 @@ pub(crate) enum ConfigSubCommands {
             required = true,
             help = "Path to the configuration file to create"
         )]
-        path: String,
+        path: PathBuf,
         #[arg(short, long, help = "Content of the configuration file to create")]
         content: Option<String>,
         #[arg(
@@ -50,23 +68,6 @@ pub(crate) enum ConfigSubCommands {
             long,
             required = true,
             help = "Path to the configuration file to update"
-        )]
-        path: String,
-    },
-    /// Archive a configuration file
-    Archive {
-        #[arg(
-            short,
-            long,
-            required = true,
-            help = "Name of the configuration file to archive"
-        )]
-        name: String,
-        #[arg(
-            short,
-            long,
-            required = true,
-            help = "Path to the configuration file to archive"
         )]
         path: String,
     },

@@ -2,12 +2,13 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use paramguard_core::archive::{
     db::ArchivedFile,
     error::ArchiveError,
-    interface::{ArchiveInterface, ArchiveService},
+    interface::{display::UiType, ArchiveInterface, ArchiveService},
 };
 use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     widgets::{Block, Borders, List, ListItem, Paragraph},
+    text::{Line, Span},
     Frame,
 };
 
@@ -62,7 +63,27 @@ impl ArchiveScreen {
                 } else {
                     Style::default()
                 };
-                ListItem::new(format!("{}: {}", archive.id, archive.name)).style(style)
+
+                let display_info = archive.to_display_info(UiType::Tui);
+                ListItem::new(vec![
+                    Line::from(vec![
+                        Span::styled(format!("{}: ", display_info.id.clone()), style),
+                        Span::styled(display_info.name.clone(), style),
+                    ]),
+                    Line::from(vec![
+                        Span::raw("   "),
+                        Span::styled(display_info.age.clone(), Style::default().fg(Color::Gray)),
+                        Span::raw(" - "),
+                        Span::styled(
+                            display_info.status.clone(),
+                            if display_info.status == "Expired" {
+                                Style::default().fg(Color::Red)
+                            } else {
+                                Style::default().fg(Color::Green)
+                            },
+                        ),
+                    ]),
+                ])
             })
             .collect();
 

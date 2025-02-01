@@ -1,10 +1,11 @@
+use crate::config::error::ConfigError;
 use std::io::Write;
 
 pub fn create_env_file(
     name: String,
     path: String,
     env_vars: Option<Vec<String>>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), ConfigError> {
     let mut file = match std::fs::OpenOptions::new()
         .create(true)
         .write(true)
@@ -12,8 +13,9 @@ pub fn create_env_file(
     {
         Ok(file) => file,
         Err(e) => {
-            eprintln!("Error creating file");
-            return Err(e);
+            return Err(ConfigError::PermissionDenied(
+                "Error creating file".to_string(),
+            ));
         }
     };
 
@@ -24,9 +26,8 @@ pub fn create_env_file(
             file.write_all(var_bytes).unwrap_or_default();
         });
     } else {
-        return Err(std::io::Error::new(
-            std::io::ErrorKind::InvalidInput,
-            "Empty environment variables",
+        return Err(ConfigError::ValidationError(
+            "Empty environment variables".to_string(),
         ));
     }
 

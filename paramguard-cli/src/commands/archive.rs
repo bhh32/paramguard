@@ -1,13 +1,16 @@
 use crate::args::archiveargs::ArchiveCommands;
+use crate::display::formatter;
+use chrono::Utc;
 use paramguard_core::archive::{
     db::{ArchiveStatistics, RetentionInfo},
+    error::ArchiveError,
     interface::{
-        display::{ArchiveDisplayInfo, DefaultFormatter, DisplayFormatter, UiType},
+        display::{ArchiveDisplayInfo, DisplayFormatter, UiType},
         ArchiveInterface, ArchiveService,
     },
 };
 
-pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), Box<dyn std::error::Error>> {
+pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), ArchiveError> {
     let archive_service = ArchiveService::new("paramguard.db")?;
 
     match cmd {
@@ -17,7 +20,13 @@ pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), Box<dyn std::
             retention_days,
             reason,
         } => {
-            let id = archive_service.store(name, path, *retention_days, reason.clone())?;
+            let id = match archive_service.store(name, path, *retention_days, reason.clone()) {
+                Ok(id) => id,
+                Err(e) => {
+                    eprintln!("Failed to archive {name}!");
+                    return Err(e);
+                }
+            };
             println!("Archived '{name}' with ID: {id}");
         }
         ArchiveCommands::Restore { id, output_path } => {
@@ -38,7 +47,10 @@ pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), Box<dyn std::
                     })
                 })
                 .collect();
-            display_archives(&display_info);
+            match display_archives(&display_info) {
+                Ok(_) => {}
+                Err(e) => return Err(e),
+            }
         }
         ArchiveCommands::Search { query, detailed } => {
             let results = archive_service.search(query)?;
@@ -73,10 +85,9 @@ pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), Box<dyn std::
     Ok(())
 }
 
-fn display_archives(archives: &[ArchiveDisplayInfo]) -> std::io::Result<()> {
+fn display_archives(archives: &[ArchiveDisplayInfo]) -> Result<(), ArchiveError> {
     if archives.is_empty() {
-        println!("No archives found");
-        return Ok(());
+        return Err(ArchiveError::NotFound(-1));
     }
 
     for info in archives {
@@ -95,15 +106,13 @@ fn display_archives(archives: &[ArchiveDisplayInfo]) -> std::io::Result<()> {
 }
 
 fn display_statistics(stats: &ArchiveStatistics) {
-    let formatter = DefaultFormatter;
-
     println!("Archive Statistics");
     println!("=================");
     println!("Total archives:     {}", stats.total_archives);
     println!("Expired archives:   {}", stats.expired_count);
     println!(
         "Total size:         {}",
-        formatter.format_size(stats.total_size)
+        formatter().format_size(stats.total_size)
     );
     println!("Avg retention:      {:.1} days", stats.avg_retention_days);
 }
@@ -113,7 +122,7 @@ fn display_retention_info(id: i64, info: &RetentionInfo) {
     println!("================================");
     println!(
         "Archive date:       {}",
-        info.archive_date.format("%Y-%m-%d %H:%M:%S")
+        formatter().format_timestamp(info.archive_date.timestamp() as u64)
     );
     println!(
         "Retention period:   {} days",
@@ -121,7 +130,10 @@ fn display_retention_info(id: i64, info: &RetentionInfo) {
     );
 
     if let Some(remaining) = &info.time_remaining {
-        println!("Time remaining:       {} days", remaining.num_days());
+        println!(
+            "Time remaining:       {} days",
+            formatter().format_age(&(Utc::now() - *remaining))
+        );
     } else {
         println!("Status: Expired (can be deleted)");
     }

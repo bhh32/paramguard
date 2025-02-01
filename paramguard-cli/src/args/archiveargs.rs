@@ -5,21 +5,7 @@ use std::path::PathBuf;
 #[clap(about = "Archive a configuration file")]
 pub(crate) struct ArchiveArgs {
     #[command(subcommand)]
-    subcommands: ArchiveCommands,
-    #[arg(
-        short,
-        long,
-        required = true,
-        help = "Name of the configuration file to archive"
-    )]
-    pub(crate) name: String,
-    #[arg(
-        short,
-        long,
-        required = true,
-        help = "Path to the configuration file to archive"
-    )]
-    pub(crate) path: String,
+    pub subcommands: ArchiveCommands,
 }
 
 #[derive(Subcommand, Clone, Debug, PartialEq)]
@@ -35,8 +21,8 @@ pub(crate) enum ArchiveCommands {
         /// Number of days to retain the archive (default: 30)
         #[arg(short, long, default_value = "30")]
         retention_days: i64,
-        /// Reason for archiving
-        #[arg(short, long)]
+        /// Reason/description for archiving
+        #[arg(short = 'd', long)]
         reason: Option<String>,
     },
     /// Restore an archived file

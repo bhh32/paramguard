@@ -37,6 +37,7 @@
 //! ```
 
 use super::{error::*, types::*};
+use crate::archive::{ArchiveDb, ArchiveError, ArchivedFile};
 use chrono::Utc;
 use std::{collections::HashMap, fs, path::Path};
 
@@ -123,7 +124,7 @@ impl ConfigManager {
             ));
         }
 
-        let format = Self::detect_format(path)?;
+        let format = ConfigManager::detect_format(path)?;
         let content = fs::read_to_string(path).map_err(|e| {
             if e.kind() == std::io::ErrorKind::PermissionDenied {
                 ConfigError::PermissionDenied(format!(
@@ -214,7 +215,7 @@ impl ConfigManager {
         &mut self,
         name: &str,
         path: &Path,
-        format: ConfigFormat,
+        fmt: ConfigFormat,
         init_content: Option<&str>,
     ) -> Result<(), ConfigError> {
         // Check if config already exists in manager
@@ -234,18 +235,18 @@ impl ConfigManager {
         let content = match init_content {
             Some(content) => {
                 if content.is_empty() {
-                    format.get_default_content().to_string()
+                    fmt.get_default_content().to_string()
                 } else {
                     content.to_string()
                 }
             }
-            None => format.get_default_content().to_string(),
+            None => fmt.get_default_content().to_string(),
         };
 
         let config = ConfigFile {
             name: name.to_string(),
             path: path.to_path_buf(),
-            format,
+            format: fmt,
             content: content.clone(),
             last_modified: Utc::now(),
         };
@@ -502,7 +503,7 @@ impl ConfigManager {
                 })?;
             }
             ConfigFormat::Ini | ConfigFormat::Cfg => {
-                let mut in_section = false;
+                let mut _in_section = false;
                 for (line_num, line) in config.content.lines().enumerate() {
                     let line = line.trim();
                     if line.is_empty() || line.starts_with(';') || line.starts_with('#') {
@@ -518,7 +519,7 @@ impl ConfigManager {
                                 config.path.to_string_lossy()
                             )));
                         }
-                        in_section = true;
+                        _in_section = true;
                         continue;
                     }
 

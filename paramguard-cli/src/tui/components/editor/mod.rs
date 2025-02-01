@@ -5,6 +5,7 @@ use crate::tui::{
     terminal,
 };
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
+use features::syntax_highlighting::SyntaxToken;
 use ratatui::{
     backend::CrosstermBackend,
     style::{Color, Style},
@@ -92,12 +93,16 @@ impl Editor {
                 let cursor_col = remaining_chars;
                 if line.is_empty() {
                     // Only show cursor for empty lines
-                    line_spans.push(Span::styled("█", Style::default().fg(Color::White)));
+                    line_spans.push(Span::styled("|", Style::default().fg(Color::White)));
                 } else {
                     use crate::tui::components::editor::features::syntax_highlighting::SyntaxHighlighter;
                     let highlighted_tokens = self.highlighter.highlight_line(line);
 
                     let mut current_pos = 0;
+                    
+                    let default_token = SyntaxToken { text: "".to_string(), style: Style::new().fg(Color::White).bg(Color::Black) };
+                    let common_style = highlighted_tokens.last().unwrap_or(&default_token).style;
+
                     for token in highlighted_tokens {
                         if cursor_col >= current_pos && cursor_col < current_pos + token.text.len()
                         {
@@ -110,11 +115,14 @@ impl Editor {
                                 line_spans
                                     .push(Span::styled(before_cursor.to_string(), token.style));
                             }
-                            line_spans.push(Span::styled("█", Style::default().fg(Color::White)));
 
-                            if !after_cursor.is_empty() {
-                                line_spans
-                                    .push(Span::styled(after_cursor.to_string(), token.style));
+                            
+                            // Highlight the character at the cursor position
+                            if let Some(cursor_char) = after_cursor.chars().next() {
+                                line_spans.push(Span::styled(cursor_char.to_string(), Style::default().bg(Color::White).fg(Color::Black)));
+                                line_spans.push(Span::styled(after_cursor[cursor_char.len_utf8()..].to_string(), token.style));
+                            } else {
+                                line_spans.push(Span::styled("|", Style::default().fg(Color::White)));
                             }
                         } else {
                             line_spans.push(Span::styled(token.text.clone(), token.style));
@@ -123,7 +131,19 @@ impl Editor {
                     }
                     // Show cursor if we're at the end of this line (on the newline character)
                     if cursor_col == line.len() {
-                        line_spans.push(Span::styled("█", Style::default().fg(Color::White)));
+                        // Remove the highlight from the previous character
+                        if let Some(last_span) = line_spans.pop(){
+                            let last_span_text = last_span.content.to_string();
+                            let last_span_style = last_span.style;
+
+                            if let Some(last_char) = last_span.content.chars().last() {
+                                let new_span_text = format!("{}{}", &last_span_text[..last_span_text.len() - last_char.len_utf8()], last_char);
+                                line_spans.push(Span::styled(new_span_text, common_style));
+                                line_spans.push(Span::styled("|", Style::default().fg(Color::White)));
+                            } else {
+                                line_spans.push(Span::styled(last_span.clone().to_string(), common_style));
+                            }
+                        }
                     }
                 }
             } else {
@@ -149,7 +169,7 @@ impl Editor {
             styled_content.push(Line::from(vec![
                 Span::styled(line_number, Style::default().fg(Color::LightBlue)),
                 Span::styled("| ", Style::default().fg(Color::DarkGray)),
-                Span::styled("█", Style::default().fg(Color::White)),
+                Span::styled("|", Style::default().fg(Color::White)),
             ]));
         }
 

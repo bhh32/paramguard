@@ -3,6 +3,7 @@ pub mod display;
 use crate::archive::db::{ArchiveDb, ArchiveStatistics, ArchivedFile, RetentionInfo};
 use crate::archive::error::*;
 use chrono::{Duration, Utc};
+use display::{DefaultFormatter, DisplayFormatter};
 use std::path::PathBuf;
 
 pub trait ArchiveInterface {
@@ -85,8 +86,9 @@ impl ArchiveInterface for ArchiveService {
         retention_days: i64,
         reason: Option<String>,
     ) -> Result<i64, ArchiveError> {
+        let path_str = format!("{}/{name}", path.to_str().unwrap_or_default());
         // Read file content
-        let content = std::fs::read(path).map_err(|err| ArchiveError::IoError(err))?;
+        let content = std::fs::read(path_str).map_err(|err| ArchiveError::IoError(err))?;
 
         // Detect format from path
         let format = path

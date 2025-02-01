@@ -133,7 +133,7 @@ impl ArchiveDb {
 
         self.conn.execute(
             "INSERT INTO archived_files
-            (name, origina_path, format, content_hash, file_content, archive_date, retention_period, reason, metadata)
+            (name, original_path, format, content_hash, file_content, archive_date, retention_period, reason, metadata)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)",
             params![
                 name,
@@ -185,8 +185,8 @@ impl ArchiveDb {
 
     pub fn list_archives(&self) -> SqliteResult<Vec<ArchivedFile>> {
         let mut stmt = self.conn.prepare(
-            "SELECT id, name, origina_path, format, content_hash, archive_date,
-             retention_period, reaason, metadata
+            "SELECT id, name, original_path, format, content_hash, archive_date,
+             retention_period, reason, metadata
             FROM archived_files
             ORDER BY archive_date DESC",
         )?;
