@@ -1,13 +1,16 @@
 use crate::args::archiveargs::ArchiveCommands;
 use crate::display::formatter;
 use chrono::Utc;
-use paramguard_core::archive::{
-    db::{ArchiveStatistics, RetentionInfo},
-    error::ArchiveError,
-    interface::{
-        display::{ArchiveDisplayInfo, DisplayFormatter, UiType},
-        ArchiveInterface, ArchiveService,
+use paramguard_core::{
+    archive::{
+        db::{ArchiveStatistics, RetentionInfo},
+        error::ArchiveError,
+        interface::{
+            display::ArchiveDisplayInfo,
+            ArchiveInterface, ArchiveService,
+        },
     },
+    formatter::{DisplayFormatter, UiType},
 };
 
 /// Handles the commands for the archive subcommand

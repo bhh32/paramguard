@@ -4,7 +4,8 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 
-use super::interface::display::{ArchiveDisplayInfo, DefaultFormatter, DisplayFormatter, UiType};
+use super::interface::display::ArchiveDisplayInfo;
+use crate::formatter::{DefaultFormatter, DisplayFormatter, UiType};
 
 /// Struct to hold the information for an archived configuration file
 #[derive(Debug, Serialize, Deserialize)]
@@ -337,7 +338,7 @@ impl ArchiveDb {
         let mut stmt = self.conn.prepare(
             "SELECT COUNT(*) as total,
             COALESCE(SUM(json_extract(metadata, '$.size')), 0) as total_size,
-            SUM(CASE WHEN strftime('%s', 'now') - strftime('%s', archive_date) > tetention_period THEN 1 ELSE 0 END) as expired,
+            SUM(CASE WHEN strftime('%s', 'now') - strftime('%s', archive_date) > retention_period THEN 1 ELSE 0 END) as expired,
             AVG(retention_period) / 86400.0 as avg_retention_days
             FROM archived_files"
         )?;

@@ -3,7 +3,6 @@ pub mod display;
 use crate::archive::db::{ArchiveDb, ArchiveStatistics, ArchivedFile, RetentionInfo};
 use crate::archive::error::*;
 use chrono::{Duration, Utc};
-use display::{DefaultFormatter, DisplayFormatter};
 use std::path::PathBuf;
 
 /// Archive subsystem functions

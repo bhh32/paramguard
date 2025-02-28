@@ -8,6 +8,9 @@ use thiserror::Error;
 /// Errors that can occur during configuration operations.
 #[derive(Debug, Error)]
 pub enum ConfigError {
+    #[error("Database error: {0}")]
+    DbError(#[from] rusqlite::Error),
+
     /// Returned when there is an error reading from or writing to a file.
     ///
     /// # Examples
@@ -127,6 +130,7 @@ impl ConfigError {
     /// ```
     pub fn user_friendly_message(&self) -> String {
         match self {
+            ConfigError::DbError(e) => format!("Unable to process the database request: {e}"),
             ConfigError::ReadError(e) => format!("Unable to access configuration file: {}", e),
             ConfigError::InvalidFormat(msg) => {
                 format!("Configuration format is not valid: {}", msg)

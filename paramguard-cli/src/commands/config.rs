@@ -5,7 +5,7 @@ use paramguard_core::{
 };
 
 pub fn handle_config_command(cmd: &ConfigCommands) -> Result<(), ConfigError> {
-    let mut config_mgr = ConfigManager::new();
+    let mut config_mgr = ConfigManager::new("paramguard.db");
 
     match cmd {
         ConfigCommands::Add { name, path } => {
