@@ -29,18 +29,7 @@ pub enum ConfigFormat {
     Nix,
 }
 
-/// Represents a configuration file managed by ParamGuard.
-///
-/// Contains metadata about the configuration file including its location,
-/// format, content, and last modification time.
-#[derive(Debug, Clone)]
-pub struct ConfigFile {
-    pub name: String,
-    pub path: PathBuf,
-    pub format: ConfigFormat,
-    pub content: String,
-    pub last_modified: DateTime<Utc>,
-}
+
 
 impl ConfigFormat {
     /// Returns the file extension associated with this configuration format.

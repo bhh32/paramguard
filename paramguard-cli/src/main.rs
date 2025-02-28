@@ -17,6 +17,7 @@ fn main() -> Result<(), std::io::Error> {
         match Tui::start() {
             Ok(_) => {
                 // TODO: Start the TUI part of the application.
+                println!("TUI not implemented yet.");
             }
             Err(e) => {
                 eprintln!("Error starting TUI or the TUI exited unexpectedly: {}", e);

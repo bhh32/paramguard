@@ -1,0 +1,4 @@
+[package]
+name = "test_pkg"
+version = "1.0.0"
+author = "Bryan Hyland"

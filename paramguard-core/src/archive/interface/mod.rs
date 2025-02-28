@@ -6,6 +6,7 @@ use chrono::{Duration, Utc};
 use display::{DefaultFormatter, DisplayFormatter};
 use std::path::PathBuf;
 
+/// Archive subsystem functions
 pub trait ArchiveInterface {
     fn store(
         &self,
@@ -21,7 +22,7 @@ pub trait ArchiveInterface {
     fn can_delete(&self, id: i64) -> Result<bool, ArchiveError>;
 }
 
-// High-level archive operations service
+/// High-level archive operations service
 pub struct ArchiveService {
     db: ArchiveDb,
 }
@@ -33,6 +34,7 @@ impl ArchiveService {
         })
     }
 
+    /// Delete a configuration file after the retention period has ended
     pub fn delete(&self, id: i64) -> Result<(), ArchiveError> {
         if self.can_delete(id)? {
             self.db.delete_archive(id).map_err(ArchiveError::DbError)
@@ -41,6 +43,7 @@ impl ArchiveService {
         }
     }
 
+    /// Get the retention information of an archived configuration file
     pub fn get_retention_info(&self, id: i64) -> Result<RetentionInfo, ArchiveError> {
         let archive = self.db.get_archive_info(id).map_err(|e| match e {
             rusqlite::Error::QueryReturnedNoRows => ArchiveError::NotFound(id),
@@ -64,6 +67,7 @@ impl ArchiveService {
         })
     }
 
+    /// Update a configuration file's retention period
     pub fn update_retention(&self, id: i64, new_retention_days: i64) -> Result<(), ArchiveError> {
         self.db
             .update_retention_period(id, new_retention_days * 86400)
@@ -73,12 +77,14 @@ impl ArchiveService {
             })
     }
 
+    /// Get the statistical information of the configuration file archive database
     pub fn get_statistics(&self) -> Result<ArchiveStatistics, ArchiveError> {
         self.db.get_statistics().map_err(ArchiveError::DbError)
     }
 }
 
 impl ArchiveInterface for ArchiveService {
+    /// Store a configuration file in the archive database
     fn store(
         &self,
         name: &str,
@@ -130,6 +136,7 @@ impl ArchiveInterface for ArchiveService {
         Ok(id)
     }
 
+    /// Restore a configuration file from the archive database
     fn restore(&self, id: i64, output_path: Option<PathBuf>) -> Result<PathBuf, ArchiveError> {
         // Retrieve archived file and content
         let (archived_file, content) = self.db.restore_file(id).map_err(|e| match e {
@@ -161,20 +168,24 @@ impl ArchiveInterface for ArchiveService {
         Ok(restore_path)
     }
 
+    /// Return a list of the files in the archive database
     fn list(&self) -> Result<Vec<ArchivedFile>, ArchiveError> {
         self.db.list_archives().map_err(ArchiveError::DbError)
     }
 
+    /// Search the archive database for configuration files
     fn search(&self, query: &str) -> Result<Vec<ArchivedFile>, ArchiveError> {
         self.db
             .search_archives(query)
             .map_err(ArchiveError::DbError)
     }
 
+    /// Do a clean up of the archive database (remove all expired configuration files that are archived)
     fn cleanup(&self) -> Result<usize, ArchiveError> {
         self.db.cleanup_expired().map_err(ArchiveError::DbError)
     }
 
+    /// Return if a configuration file has passed its retention period or not
     fn can_delete(&self, id: i64) -> Result<bool, ArchiveError> {
         self.db.can_delete(id).map_err(ArchiveError::DbError)
     }

@@ -10,16 +10,21 @@ use paramguard_core::archive::{
     },
 };
 
+/// Handles the commands for the archive subcommand
 pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), ArchiveError> {
+    // Creates or connects to the paramguard.db sqlite database file.
     let archive_service = ArchiveService::new("paramguard.db")?;
-
+    
+    // Match the archive subcommand given from the command line.
     match cmd {
+        // Store a new config file given the parameters.
         ArchiveCommands::Store {
             name,
             path,
             retention_days,
             reason,
         } => {
+            // Return the database id after the file is stored in the archive
             let id = match archive_service.store(name, path, *retention_days, reason.clone()) {
                 Ok(id) => id,
                 Err(e) => {
@@ -27,10 +32,13 @@ pub fn handle_archive_command(cmd: &ArchiveCommands) -> Result<(), ArchiveError>
                     return Err(e);
                 }
             };
+            // Print out the file name and the database id so the user knows it was stored.
             println!("Archived '{name}' with ID: {id}");
         }
+        // Restore the file version stored with the id in the database to the given output path.
         ArchiveCommands::Restore { id, output_path } => {
             let restored_path = archive_service.restore(*id, output_path.clone())?;
+            // Let the user know the file has been restored to the given path.
             println!("Restored archive {id} to {}", restored_path.display());
         }
         ArchiveCommands::List {

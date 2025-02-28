@@ -6,6 +6,7 @@ use std::path::PathBuf;
 
 use super::interface::display::{ArchiveDisplayInfo, DefaultFormatter, DisplayFormatter, UiType};
 
+/// Struct to hold the information for an archived configuration file
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ArchivedFile {
     pub id: i64,
@@ -20,6 +21,7 @@ pub struct ArchivedFile {
 }
 
 impl ArchivedFile {
+    /// Convert an archived configuration file it's display information
     pub fn to_display_info(&self, ui_type: UiType) -> ArchiveDisplayInfo {
         let formatter = DefaultFormatter;
         let truncate_lengths = ui_type.get_truncate_lengths();
@@ -61,6 +63,7 @@ impl ArchivedFile {
         }
     }
 
+    /// The the status string of an archived file
     fn get_status_string<F: DisplayFormatter>(&self, formatter: &F) -> String {
         let now = Utc::now();
         let retention_period = chrono::Duration::seconds(self.retention_period);
@@ -74,6 +77,7 @@ impl ArchivedFile {
         }
     }
 
+    /// Get the remaining retention period left for a configuration file before it is allowed to be deleted
     fn get_retention_remaining(&self) -> Option<String> {
         let now = Utc::now();
         let retention_period = chrono::Duration::seconds(self.retention_period);
@@ -87,11 +91,13 @@ impl ArchivedFile {
     }
 }
 
+/// Holds the archive database connection and functionality
 pub struct ArchiveDb {
     conn: Connection,
 }
 
 impl ArchiveDb {
+    /// Create a new archive database with the given file name and path
     pub fn new(db_path: &str) -> SqliteResult<Self> {
         let conn = Connection::open(db_path)?;
 
@@ -116,6 +122,7 @@ impl ArchiveDb {
         Ok(Self { conn })
     }
 
+    /// Archives a configuration file in the database
     pub fn archive_file(
         &self,
         name: &str,
@@ -151,6 +158,7 @@ impl ArchiveDb {
         Ok(self.conn.last_insert_rowid())
     }
 
+    /// Restores a file from the archive database
     pub fn restore_file(&self, id: i64) -> SqliteResult<(ArchivedFile, Vec<u8>)> {
         let mut stmt = self.conn.prepare(
             "SELECT id, name, original_path, format, content_hash, file_content, archive_date, retention_period, reason, metadata
@@ -183,6 +191,7 @@ impl ArchiveDb {
         }
     }
 
+    /// Query's the archive database to list all archived files.
     pub fn list_archives(&self) -> SqliteResult<Vec<ArchivedFile>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, name, original_path, format, content_hash, archive_date,
@@ -210,6 +219,7 @@ impl ArchiveDb {
         archive_iter.collect()
     }
 
+    /// Returns whether an archived configuration file can be deleted or if it's still in its retention period
     pub fn can_delete(&self, id: i64) -> SqliteResult<bool> {
         let mut stmt = self.conn.prepare(
             "SELECT archive_date, retention_period
@@ -229,6 +239,8 @@ impl ArchiveDb {
         Ok(Utc::now() - archive_date >= retention_seconds)
     }
 
+    /// Deletes an archived configuration file from the archived file database if it's not
+    /// still in its retention period.
     pub fn delete_archive(&self, id: i64) -> SqliteResult<()> {
         if self.can_delete(id)? {
             self.conn
@@ -242,6 +254,7 @@ impl ArchiveDb {
         }
     }
 
+    /// Allows manual or automatic database cleanup of expired configuration files
     pub fn cleanup_expired(&self) -> SqliteResult<usize> {
         let result = self.conn.execute(
             "DELETE FROM archived_files WHERE strftime('%s', 'now') - strftime('%s', archive_date) > retention_period",
@@ -251,6 +264,7 @@ impl ArchiveDb {
         Ok(result)
     }
 
+    /// Search the database for archived configuration files meeting the query
     pub fn search_archives(&self, query: &str) -> SqliteResult<Vec<ArchivedFile>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, name, original_path, format, content_hash, archive_date,
@@ -280,6 +294,7 @@ impl ArchiveDb {
         archive_iter.collect()
     }
 
+    /// Get the information of an archived configuration file with the given database id
     pub fn get_archive_info(&self, id: i64) -> SqliteResult<ArchivedFile> {
         let mut stmt = self.conn.prepare(
             "SELECT id, name, original_path, format, content_hash, archive_date,
@@ -305,6 +320,7 @@ impl ArchiveDb {
         })
     }
 
+    /// Update the retention period of a given configuration file using its database id
     pub fn update_retention_period(&self, id: i64, new_retention_seconds: i64) -> SqliteResult<()> {
         self.conn.execute(
             "UPDATE archived_files
@@ -316,6 +332,7 @@ impl ArchiveDb {
         Ok(())
     }
 
+    /// Get the statistical information of the archive database
     pub fn get_statistics(&self) -> SqliteResult<ArchiveStatistics> {
         let mut stmt = self.conn.prepare(
             "SELECT COUNT(*) as total,
@@ -340,6 +357,7 @@ impl ArchiveDb {
     }
 }
 
+/// Holds the retention information of an archived file
 #[derive(Debug)]
 pub struct RetentionInfo {
     pub archive_date: DateTime<Utc>,
@@ -348,6 +366,7 @@ pub struct RetentionInfo {
     pub can_delete: bool,
 }
 
+/// Holds the archive database statistical information
 #[derive(Debug)]
 pub struct ArchiveStatistics {
     pub total_archives: usize,
